@@ -4,6 +4,7 @@ import Register from "./Components/Register"
 import Home from "./Components/Home"
 import Login from "./Components/Login"
 import Error from "./Components/Error"
+import HackathonRegistration from "./Components/HackathonRegistration"
 
 function App() {
   const router = createBrowserRouter([
@@ -39,6 +40,15 @@ function App() {
       element: (
         <>
           <Register />
+        </>
+      ),
+    },
+
+    {
+      path: '/hackathon-registration',
+      element: (
+        <>
+          <HackathonRegistration />
         </>
       ),
     },

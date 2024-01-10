@@ -21,7 +21,7 @@ const Register = () => {
       // setUserdata(response.data.user)
       console.log(userdata)
 
-      if (response.data.user.name !== "null" && response.data.user.regNo !== 0 ){//&& response.data.user.screenshot!=="null") {
+      if (response.data.user.name !== "null" && response.data.user.regNo !== 0 && response.data.user.screenshot !== "null") {
         navigate("/")
       }
 
@@ -36,16 +36,18 @@ const Register = () => {
   }, [])
 
   const [formData, setFormData] = useState({
-    
-    name: '',
+
+    name: 'null',
     phoneNo: 0,
     regNo: 0,
-    branch:'',
-    learnerid:'',
-    upiID:'',
-    txnID:'',
+    branch: 'null',
+    learnerid: 'null',
+    upiID: 'null',
+    txnID: 'null',
     screenshot: 'null',
   });
+
+  const [image, setImage] = useState("")
 
   const handleChange = (e) => {
     setFormData({
@@ -57,17 +59,55 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
-  
-    try {  
-      // Invoking the asynchronous function 
+
+    try {
+      // Wait for the image to be uploaded before proceeding
+
+      //await uploadScreenshot();
+
+      // Once uploadScreenshot completes, updateData can be called
       await updateData(userdata._id);
       navigate("/");
     } catch (error) {
-      console.log("axios error: ", error);
+      console.log("Error during form submission: ", error);
       navigate("*");
     }
   };
-  
+
+  const uploadScreenshot = async (e) => {
+    e.preventDefault()
+    const data = new FormData();
+    data.append("file", image);
+    data.append("upload_preset", "Aurora");
+    data.append("cloud_name", "days7d2mj");
+
+    try {
+      const response = await fetch("https://api.cloudinary.com/v1_1/days7d2mj/image/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const result = await response.json();
+      console.log(result);
+
+      // Update the screenshot field in the form data
+      setFormData({ ...formData, screenshot: result.secure_url });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error; // Propagate the error to the calling function
+    }
+    const uploadbtn = document.getElementById('upload');
+    if(uploadbtn){
+      uploadbtn.style.backgroundColor='green';
+      uploadbtn.innerText='Uploaded';
+    }
+  };
+
+
   // Define the asynchronous function
   const updateData = async (id) => {
     try {
@@ -78,15 +118,15 @@ const Register = () => {
           'Content-Type': 'application/json'
         }
       });
-  
+
       const json = await response.json();
-      console.log("response json: ", json);
+      console.log("Response JSON: ", json);
     } catch (error) {
       console.error("Error updating data:", error);
       // Handle the error as needed
     }
   };
-  
+
 
   return (
     <form className='container mx-auto sm max-w-96'>
@@ -243,7 +283,7 @@ const Register = () => {
 
             <div className="col-span-full">
               <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
-                Screenshot
+                Add Payment Screenshot
               </label>
               <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                 <div className="text-center">
@@ -253,12 +293,18 @@ const Register = () => {
                       htmlFor="file-upload"
                       className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
                     >
-                      <span>Upload Screenshot of payment</span>
-                      <input id="screenshot" name="screenshot" type="file" className="sr-only" />
+                      <span>Upload a file</span>
+                      <input id="file-upload" name="screenshot" type="file" className="sr-only" onChange={(e) => { setImage(e.target.files[0]) }} />
                     </label>
-                    <p className="pl-1">or drag and drop</p>
+
+                    
                   </div>
-                  <p className="text-xs leading-5 text-gray-600">PNG, JPG</p>
+                  {image ? <><p className="text-xs leading-5 text-gray-600 flex justify-center"><img src={URL.createObjectURL(image)} alt="Selected" className="ml-2 w-10 h-10 object-cover rounded-full" /></p></> : null}
+                  <p className="text-xs leading-5 text-gray-600 flex justify-center">PNG, JPG</p>
+                  <br />
+                  <button id='upload' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={uploadScreenshot}>
+                    Upload
+                  </button>
                 </div>
               </div>
             </div>
