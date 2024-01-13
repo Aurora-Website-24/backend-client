@@ -9,12 +9,19 @@ function HackathonRegistration() {
 
     const [formData, setFormData] = useState({});
 
-    //console.log("response", userdata)
+    
     const [userdata, setUserdata] = useState({});
     const getUser = async () => {
         try {
             const response = await axios.get("http://localhost:6005/login/success", { withCredentials: true });
             setUserdata(response.data.user)
+            console.log(userdata)
+            // setFormData({
+            //     leaderName: userdata.name,
+            //     leaderPhoneNo: userdata.phoneNo,
+            //     leaderRegNo: userdata.regNo,
+            //     leaderLearnerid: userdata.learnerid,
+            // })
         } catch (error) {
             console.log("error", error)
         }
@@ -26,12 +33,7 @@ function HackathonRegistration() {
             try {
                 const response = await axios.get("http://localhost:6005/hackathon-team-data", { withCredentials: true });
                 setPrevTeamData(response.data.hackathon)
-                setFormData({
-                    leaderName: userdata.name,
-                    leaderPhoneNo: userdata.phoneNo,
-                    leaderRegNo: userdata.regNo,
-                    leaderLearnerid: userdata.learnerid,
-                })
+                
             } catch (error) {
                 console.log("error: ", error)
             }
@@ -73,7 +75,19 @@ function HackathonRegistration() {
     useEffect(() => {
         getUser()
         getHackathonData()
+
+        setFormData({
+            leaderName: userdata.name,
+            leaderPhoneNo: userdata.phoneNo,
+            leaderRegNo: userdata.regNo,
+            leaderLearnerid: userdata.learnerid,
+        })
+
     }, [])
+
+    console.log("userdata", userdata)
+    console.log("prev team data", prevTeamData)
+    console.log("form data", formData)
 
     const [image, setImage] = useState("")
 
@@ -86,7 +100,7 @@ function HackathonRegistration() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formData);
+        console.log("submitted form data: ", formData);
 
         if (userdata.hackathon === true) {
             try {
@@ -163,7 +177,7 @@ function HackathonRegistration() {
             }
 
             const result = await response.json();
-            console.log(result);
+            //console.log(result);
 
             // Update the screenshot field in the form data
             setFormData({ ...formData, screenshot: result.secure_url });
@@ -204,7 +218,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={userdata.name}
+                                        defaultValue={userdata.name}
                                         required
                                         type="text"
                                         name="leaderName"
@@ -224,7 +238,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={userdata.phoneNo}
+                                        defaultValue={userdata.phoneNo}
                                         required
                                         type="number"
                                         name="leaderPhoneNo"
@@ -245,7 +259,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={userdata.regNo}
+                                        defaultValue={userdata.regNo}
                                         required
                                         type="number"
                                         name="leaderRegNo"
@@ -266,7 +280,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={userdata.learnerid}
+                                        defaultValue={userdata.learnerid}
                                         required
                                         type="email"
                                         name="leaderLearnerid"
@@ -298,7 +312,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={prevTeamData.teamName}
+                                        defaultValue={prevTeamData.teamName}
                                         required
                                         type="text"
                                         name="teamName"
@@ -318,7 +332,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={prevTeamData.teamSize}
+                                        defaultValue={prevTeamData.teamSize}
                                         required
                                         type="number"
                                         name="teamSize"
@@ -352,7 +366,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member1Name}
+                                        defaultValue={formData.member1Name}
                                         required
                                         type="text"
                                         name="member1Name"
@@ -372,7 +386,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member1PhoneNo}
+                                        defaultValue={formData.member1PhoneNo}
                                         required
                                         type="number"
                                         name="member1PhoneNo"
@@ -393,7 +407,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member1RegNo}
+                                        defaultValue={formData.member1RegNo}
                                         required
                                         type="number"
                                         name="member1RegNo"
@@ -426,7 +440,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member2Name}
+                                        defaultValue={formData.member2Name}
                                         type="text"
                                         name="member2Name"
                                         id="member2Name"
@@ -445,7 +459,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member2PhoneNo}
+                                        defaultValue={formData.member2PhoneNo}
                                         type="number"
                                         name="member2PhoneNo"
                                         id="member2PhoneNo"
@@ -465,7 +479,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member2RegNo}
+                                        defaultValue={formData.member2RegNo}
                                         type="number"
                                         name="member2RegNo"
                                         id="member2RegNo"
@@ -497,7 +511,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member3Name}
+                                        defaultValue={formData.member3Name}
                                         type="text"
                                         name="member3Name"
                                         id="member3Name"
@@ -516,7 +530,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member3PhoneNo}
+                                        defaultValue={formData.member3PhoneNo}
                                         type="number"
                                         name="member3PhoneNo"
                                         id="member3PhoneNo"
@@ -536,7 +550,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member3RegNo}
+                                        defaultValue={formData.member3RegNo}
                                         type="number"
                                         name="member3RegNo"
                                         id="member3RegNo"
@@ -568,7 +582,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member4Name}
+                                        defaultValue={formData.member4Name}
                                         type="text"
                                         name="member4Name"
                                         id="member4Name"
@@ -587,7 +601,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member4PhoneNo}
+                                        defaultValue={formData.member4PhoneNo}
                                         type="number"
                                         name="member4PhoneNo"
                                         id="member4PhoneNo"
@@ -607,7 +621,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        // defaultValue={formData.member4RegNo}
+                                        defaultValue={formData.member4RegNo}
                                         type="number"
                                         name="member4RegNo"
                                         id="member4RegNo"
@@ -696,7 +710,7 @@ function HackathonRegistration() {
                                     {image ? <><p className="text-xs leading-5 text-gray-600 flex justify-center"><img src={URL.createObjectURL(image)} alt="Selected" className="ml-2 w-10 h-10 object-cover rounded-full" /></p></> : null}
                                     <p className="text-xs leading-5 text-gray-600 flex justify-center">PNG, JPG</p>
                                     <br />
-                                    <button id='upload' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={uploadScreenshot}>
+                                    <button id='upload' className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={uploadScreenshot}>
                                         Upload
                                     </button>
                                 </div>
