@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
+import { PhotoIcon } from '@heroicons/react/24/solid'
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
@@ -7,59 +7,87 @@ function HackathonRegistration() {
 
     const navigate = useNavigate();
 
+    const [formData, setFormData] = useState({});
+
+    
+    const [userdata, setUserdata] = useState({});
     const getUser = async () => {
         try {
             const response = await axios.get("http://localhost:6005/login/success", { withCredentials: true });
-
-            console.log("response", response)
+            setUserdata(response.data.user)
+            console.log(userdata)
+            // setFormData({
+            //     leaderName: userdata.name,
+            //     leaderPhoneNo: userdata.phoneNo,
+            //     leaderRegNo: userdata.regNo,
+            //     leaderLearnerid: userdata.learnerid,
+            // })
         } catch (error) {
-            navigate("*")
+            console.log("error", error)
         }
+    }
+
+    const [prevTeamData, setPrevTeamData] = useState({});
+    const getHackathonData = async () => {
+        if (userdata.hackathon === true) {
+            try {
+                const response = await axios.get("http://localhost:6005/hackathon-team-data", { withCredentials: true });
+                setPrevTeamData(response.data.hackathon)
+                
+            } catch (error) {
+                console.log("error: ", error)
+            }
+        }
+        else if (userdata.hackathon === false) {
+            setPrevTeamData({
+                teamName: '',
+                teamSize: null,
+
+                leaderName: '',
+                leaderPhoneNo: null,
+                leaderRegNo: null,
+                leaderLearnerid: '',
+
+                member1Name: '',
+                member1PhoneNo: null,
+                member1RegNo: null,
+
+                member2Name: '',
+                member2PhoneNo: null,
+                member2RegNo: null,
+
+                member3Name: '',
+                member3PhoneNo: null,
+                member3RegNo: null,
+
+                member4Name: '',
+                member4PhoneNo: null,
+                member4RegNo: null,
+
+                upiID: '',
+                txnID: '',
+                screenshot: '',
+            });
+        }
+
     }
 
     useEffect(() => {
         getUser()
+        getHackathonData()
+
+        setFormData({
+            leaderName: userdata.name,
+            leaderPhoneNo: userdata.phoneNo,
+            leaderRegNo: userdata.regNo,
+            leaderLearnerid: userdata.learnerid,
+        })
+
     }, [])
 
-    const [formData, setFormData] = useState({
-
-        teamName: '',
-        teamSize: null,
-
-        leaderName: '',
-        leaderPhoneNo: null,
-        leaderRegNo: null,
-        leaderBranch: '',
-        leaderLearnerid: '',
-
-        member1Name: '',
-        member1PhoneNo: null,
-        member1RegNo: null,
-        member1Branch: '',
-        member1Learnerid: '',
-
-        member2Name: '',
-        member2PhoneNo: null,
-        member2RegNo: null,
-        member2Branch: '',
-        member2Learnerid: '',
-
-        member3Name: '',
-        member3PhoneNo: null,
-        member3RegNo: null,
-        member3Branch: '',
-        member3Learnerid: '',
-
-        member4Name: '',
-        member4PhoneNo: null,
-        member4RegNo: null,
-        member4Branch: '',
-        member4Learnerid: '',
-
-        upiID: '',
-        txnID: '',
-        screenshot: '',
-    });
+    console.log("userdata", userdata)
+    console.log("prev team data", prevTeamData)
+    console.log("form data", formData)
 
     const [image, setImage] = useState("")
 
@@ -72,39 +100,67 @@ function HackathonRegistration() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formData);
-        
-        try {
-            const response = await fetch(`http://localhost:6005/hackathon-registration/`, {
-              method: 'POST',
-              body: JSON.stringify(formData),
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
-      
-            const json = await response.json();
-            console.log("Response JSON: ", json);
-          } catch (error) {
-            console.error("Error updating data:", error);
-            // Handle the error as needed
-          }
-          navigate('/')
+        console.log("submitted form data: ", formData);
+
+        if (userdata.hackathon === true) {
+            try {
+                const response = await fetch(`http://localhost:6005/hackathon-update-form/${prevTeamData._id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(formData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const json = await response.json();
+                console.log("Response update patch JSON: ", json);
+            } catch (error) {
+                console.error("Error updating data:", error);
+                // Handle the error as needed
+            }
+        }
+
+        else {
+            try {
+                const response = await fetch(`http://localhost:6005/hackathon-registration/`, {
+                    method: 'POST',
+                    body: JSON.stringify(formData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const json = await response.json();
+                console.log("Response update post JSON: ", json);
+            } catch (error) {
+                console.error("Error updating data:", error);
+            }
+
+            try {
+                const response = await fetch(`http://localhost:6005/register/${userdata._id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ hackathon: true }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (error) {
+                console.error("Error updating data:", error);
+            }
+        }
+        navigate('/')
     }
 
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     const uploadbtn = document.getElementById('upload');
-        
-    //     if (uploadbtn) {
-    //         uploadbtn.style.visibility = !(image) ? 'hidden' : 'visible';
-    //     } else {
-    //         console.error("Element with ID 'upload' not found");
-    //     }
-    // });
-    
     const uploadScreenshot = async (e) => {
         e.preventDefault()
-        if(!image) return;
+
+        if (!image) return;
+
+        const uploadbtn = document.getElementById('upload');
+        if (uploadbtn) {
+            uploadbtn.innerText = 'Uploading...';
+        }
+
         const data = new FormData();
         data.append("file", image);
         data.append("upload_preset", "Aurora");
@@ -121,7 +177,7 @@ function HackathonRegistration() {
             }
 
             const result = await response.json();
-            console.log(result);
+            //console.log(result);
 
             // Update the screenshot field in the form data
             setFormData({ ...formData, screenshot: result.secure_url });
@@ -129,15 +185,19 @@ function HackathonRegistration() {
             console.error('Error uploading image:', error);
             throw error; // Propagate the error to the calling function
         }
-        let uploadbtn = document.getElementById('upload');
-        if (uploadbtn ) {
+
+        if (uploadbtn) {
             uploadbtn.style.backgroundColor = 'green';
             uploadbtn.innerText = 'Uploaded';
+
+            setTimeout(() => {
+                uploadbtn.style.display = 'none'
+            }, 3000);
         }
     };
 
     return (
-        <form className='container mx-auto sm max-w-96'>
+        <form onSubmit={handleSubmit} className='container mx-auto sm max-w-96'>
             <div className="space-y-12">
 
                 <h2 className="text-base font-semibold leading-7 text-gray-900">Register for Hackathon</h2>
@@ -158,7 +218,8 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={userdata.name}
+                                        required
                                         type="text"
                                         name="leaderName"
                                         id="leaderName"
@@ -177,7 +238,8 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={userdata.phoneNo}
+                                        required
                                         type="number"
                                         name="leaderPhoneNo"
                                         id="leaderPhoneNo"
@@ -197,7 +259,8 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={userdata.regNo}
+                                        required
                                         type="number"
                                         name="leaderRegNo"
                                         id="leaderRegNo"
@@ -209,23 +272,6 @@ function HackathonRegistration() {
                             </div>
                         </div>
 
-                        <div className="sm:col-span-4">
-                            <label htmlFor="branch" className="block text-sm font-medium leading-6 text-gray-900">
-                                Branch
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                    required
-                                        type="text"
-                                        name="leaderBranch"
-                                        id="leaderBranch"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
 
                         <div className="sm:col-span-4">
                             <label htmlFor="learnerid" className="block text-sm font-medium leading-6 text-gray-900">
@@ -234,7 +280,8 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={userdata.learnerid}
+                                        required
                                         type="email"
                                         name="leaderLearnerid"
                                         id="leaderLearnerid"
@@ -258,14 +305,15 @@ function HackathonRegistration() {
 
                     <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
-                    <div className="sm:col-span-4">
+                        <div className="sm:col-span-4">
                             <label htmlFor="teamName" className="block text-sm font-medium leading-6 text-gray-900">
                                 Team Name
                             </label>
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={prevTeamData.teamName}
+                                        required
                                         type="text"
                                         name="teamName"
                                         id="teamName"
@@ -276,7 +324,7 @@ function HackathonRegistration() {
                             </div>
                         </div>
 
-                    
+
                         <div className="sm:col-span-4">
                             <label htmlFor="regNo" className="block text-sm font-medium leading-6 text-gray-900">
                                 Team Size
@@ -284,7 +332,8 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={prevTeamData.teamSize}
+                                        required
                                         type="number"
                                         name="teamSize"
                                         id="teamSize"
@@ -317,7 +366,8 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={formData.member1Name}
+                                        required
                                         type="text"
                                         name="member1Name"
                                         id="member1Name"
@@ -336,7 +386,8 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={formData.member1PhoneNo}
+                                        required
                                         type="number"
                                         name="member1PhoneNo"
                                         id="member1PhoneNo"
@@ -356,48 +407,13 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                    required
+                                        defaultValue={formData.member1RegNo}
+                                        required
                                         type="number"
                                         name="member1RegNo"
                                         id="member1RegNo"
                                         className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onFocus={(e) => e.target.addEventListener("wheel", function (e) { e.preventDefault() }, { passive: false })}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="branch" className="block text-sm font-medium leading-6 text-gray-900">
-                                Branch
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                    required
-                                        type="text"
-                                        name="member1Branch"
-                                        id="member1Branch"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="learnerid" className="block text-sm font-medium leading-6 text-gray-900">
-                                Learner's ID
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                    required
-                                        type="email"
-                                        name="member1Learnerid"
-                                        id="member1Learnerid"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -424,6 +440,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member2Name}
                                         type="text"
                                         name="member2Name"
                                         id="member2Name"
@@ -442,6 +459,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member2PhoneNo}
                                         type="number"
                                         name="member2PhoneNo"
                                         id="member2PhoneNo"
@@ -461,45 +479,12 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member2RegNo}
                                         type="number"
                                         name="member2RegNo"
                                         id="member2RegNo"
                                         className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onFocus={(e) => e.target.addEventListener("wheel", function (e) { e.preventDefault() }, { passive: false })}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="branch" className="block text-sm font-medium leading-6 text-gray-900">
-                                Branch
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                        type="text"
-                                        name="member2Branch"
-                                        id="member2Branch"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="learnerid" className="block text-sm font-medium leading-6 text-gray-900">
-                                Learner's ID
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                        type="email"
-                                        name="member2Learnerid"
-                                        id="member2Learnerid"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -526,6 +511,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member3Name}
                                         type="text"
                                         name="member3Name"
                                         id="member3Name"
@@ -544,6 +530,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member3PhoneNo}
                                         type="number"
                                         name="member3PhoneNo"
                                         id="member3PhoneNo"
@@ -563,45 +550,12 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member3RegNo}
                                         type="number"
                                         name="member3RegNo"
                                         id="member3RegNo"
                                         className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onFocus={(e) => e.target.addEventListener("wheel", function (e) { e.preventDefault() }, { passive: false })}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="branch" className="block text-sm font-medium leading-6 text-gray-900">
-                                Branch
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                        type="text"
-                                        name="member3Branch"
-                                        id="member3Branch"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="learnerid" className="block text-sm font-medium leading-6 text-gray-900">
-                                Learner's ID
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                        type="email"
-                                        name="member3Learnerid"
-                                        id="member3Learnerid"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -628,6 +582,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member4Name}
                                         type="text"
                                         name="member4Name"
                                         id="member4Name"
@@ -646,6 +601,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member4PhoneNo}
                                         type="number"
                                         name="member4PhoneNo"
                                         id="member4PhoneNo"
@@ -665,45 +621,12 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={formData.member4RegNo}
                                         type="number"
                                         name="member4RegNo"
                                         id="member4RegNo"
                                         className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onFocus={(e) => e.target.addEventListener("wheel", function (e) { e.preventDefault() }, { passive: false })}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="branch" className="block text-sm font-medium leading-6 text-gray-900">
-                                Branch
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                        type="text"
-                                        name="member4Branch"
-                                        id="member4Branch"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="learnerid" className="block text-sm font-medium leading-6 text-gray-900">
-                                Learner's ID
-                            </label>
-                            <div className="mt-2">
-                                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                    <input
-                                        type="email"
-                                        name="member4Learnerid"
-                                        id="member4Learnerid"
-                                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -731,6 +654,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        required
                                         type="text"
                                         name="upiID"
                                         id="upiID"
@@ -748,6 +672,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        required
                                         type="text"
                                         name="txnID"
                                         id="txnID"
@@ -771,7 +696,13 @@ function HackathonRegistration() {
                                             className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
                                         >
                                             <span>Upload a file</span>
-                                            <input id="file-upload" name="screenshot" type="file" className="sr-only" onChange={(e) => { setImage(e.target.files[0]) }} />
+                                            <input
+                                                required
+                                                id="file-upload"
+                                                name="screenshot"
+                                                type="file"
+                                                className="sr-only"
+                                                onChange={(e) => { setImage(e.target.files[0]) }} />
                                         </label>
 
 
@@ -779,7 +710,7 @@ function HackathonRegistration() {
                                     {image ? <><p className="text-xs leading-5 text-gray-600 flex justify-center"><img src={URL.createObjectURL(image)} alt="Selected" className="ml-2 w-10 h-10 object-cover rounded-full" /></p></> : null}
                                     <p className="text-xs leading-5 text-gray-600 flex justify-center">PNG, JPG</p>
                                     <br />
-                                    <button id='upload' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={uploadScreenshot}>
+                                    <button id='upload' className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={uploadScreenshot}>
                                         Upload
                                     </button>
                                 </div>
@@ -794,7 +725,6 @@ function HackathonRegistration() {
                 <button
                     type="submit"
                     className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    onClick={handleSubmit}
                 >
                     Register
                 </button>

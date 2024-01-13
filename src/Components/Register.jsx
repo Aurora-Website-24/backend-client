@@ -5,7 +5,6 @@ import qr from "../logo.svg"
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-
 const Register = () => {
 
   const [userdata, setUserdata] = useState({});
@@ -21,7 +20,14 @@ const Register = () => {
       // setUserdata(response.data.user)
       console.log(userdata)
 
-      if (response.data.user.name !== "null" && response.data.user.regNo !== 0 && response.data.user.screenshot !== "null") {
+      if (response.data.user.name !== "null"
+        && response.data.user.phoneNo !== 0
+        && response.data.user.regNo !== 0
+        && response.data.user.branch !== "null"
+        && response.data.user.learnerid !== "null"
+        && response.data.user.upiId !== "null"
+        && response.data.user.txnId !== "null"
+        && response.data.user.screenshot !== "null") {
         navigate("/")
       }
 
@@ -45,6 +51,7 @@ const Register = () => {
     upiID: 'null',
     txnID: 'null',
     screenshot: 'null',
+    hackathon: false,
   });
 
   const [image, setImage] = useState("")
@@ -61,11 +68,6 @@ const Register = () => {
     console.log(formData);
 
     try {
-      // Wait for the image to be uploaded before proceeding
-
-      //await uploadScreenshot();
-
-      // Once uploadScreenshot completes, updateData can be called
       await updateData(userdata._id);
       navigate("/");
     } catch (error) {
@@ -76,6 +78,13 @@ const Register = () => {
 
   const uploadScreenshot = async (e) => {
     e.preventDefault()
+    if (!image) return;
+
+    const uploadbtn = document.getElementById('upload');
+    if (uploadbtn) {
+      uploadbtn.innerText = 'Uploading';
+    }
+
     const data = new FormData();
     data.append("file", image);
     data.append("upload_preset", "Aurora");
@@ -100,10 +109,13 @@ const Register = () => {
       console.error('Error uploading image:', error);
       throw error; // Propagate the error to the calling function
     }
-    const uploadbtn = document.getElementById('upload');
-    if(uploadbtn){
-      uploadbtn.style.backgroundColor='green';
-      uploadbtn.innerText='Uploaded';
+    if (uploadbtn) {
+      uploadbtn.style.backgroundColor = 'green';
+      uploadbtn.innerText = 'Uploaded';
+
+      setTimeout(() => {
+        uploadbtn.style.display = 'none'
+      }, 3000);
     }
   };
 
@@ -129,7 +141,9 @@ const Register = () => {
 
 
   return (
-    <form className='container mx-auto sm max-w-96'>
+    <form
+      onSubmit={handleSubmit}
+      className='container mx-auto sm max-w-96'>
       <div className="space-y-12">
 
         <h2 className="text-base font-semibold leading-7 text-gray-900">Register for Aurora</h2>
@@ -150,6 +164,7 @@ const Register = () => {
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                   <input
+                    required
                     type="text"
                     name="name"
                     id="name"
@@ -168,6 +183,7 @@ const Register = () => {
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                   <input
+                    required
                     type="number"
                     name="phoneNo"
                     id="phoneNo"
@@ -187,6 +203,7 @@ const Register = () => {
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                   <input
+                    required
                     type="number"
                     name="regNo"
                     id="regNo"
@@ -205,6 +222,7 @@ const Register = () => {
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                   <input
+                    required
                     type="text"
                     name="branch"
                     id="branch"
@@ -222,6 +240,7 @@ const Register = () => {
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                   <input
+                    required
                     type="email"
                     name="learnerid"
                     id="learnerid"
@@ -247,6 +266,7 @@ const Register = () => {
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                   <input
+                    required
                     type="text"
                     name="upiID"
                     id="upiID"
@@ -264,6 +284,7 @@ const Register = () => {
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                   <input
+                    required
                     type="text"
                     name="txnID"
                     id="txnID"
@@ -294,10 +315,16 @@ const Register = () => {
                       className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
                     >
                       <span>Upload a file</span>
-                      <input id="file-upload" name="screenshot" type="file" className="sr-only" onChange={(e) => { setImage(e.target.files[0]) }} />
+                      <input
+                        required
+                        id="file-upload"
+                        name="screenshot"
+                        type="file"
+                        className="sr-only"
+                        onChange={(e) => { setImage(e.target.files[0]) }} />
                     </label>
 
-                    
+
                   </div>
                   {image ? <><p className="text-xs leading-5 text-gray-600 flex justify-center"><img src={URL.createObjectURL(image)} alt="Selected" className="ml-2 w-10 h-10 object-cover rounded-full" /></p></> : null}
                   <p className="text-xs leading-5 text-gray-600 flex justify-center">PNG, JPG</p>
@@ -317,7 +344,6 @@ const Register = () => {
         <button
           type="submit"
           className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          onClick={handleSubmit}
         >
           Register
         </button>

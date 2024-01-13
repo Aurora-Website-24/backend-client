@@ -8,7 +8,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const [userdata, setUserdata] = useState({});
-  console.log("response", userdata)
+  // console.log("response", userdata)
 
   const getUser = async () => {
     try {
@@ -27,6 +27,10 @@ const Home = () => {
 
   const hackathon = () => {
     navigate("/hackathon-registration")
+  }
+
+  const workshop = () => {
+    navigate("/workshop-registration")
   }
 
   useEffect(() => {
@@ -54,6 +58,14 @@ const Home = () => {
                 class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
                 Register for Hackathon
+              </button>
+
+              <button
+                onClick={workshop}
+                type="button"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Register for Workshops
               </button>
 
             </>
