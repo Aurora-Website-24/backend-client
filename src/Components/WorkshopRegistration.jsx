@@ -11,8 +11,8 @@ const WorkshopRegistration = () => {
     const getUser = async () => {
         try {
             const response = await axios.get("http://localhost:6005/login/success", { withCredentials: true });
-            setLogged(1)
-            localStorage.setItem('uniqueID', response.data.user._id);
+            window.localStorage.setItem('logged', 1)
+            window.localStorage.setItem('uniqueID', response.data.user._id);
             console.log(response.data.user.workshops)
             setUserData(response.data.user)
 
@@ -62,7 +62,9 @@ const WorkshopRegistration = () => {
     }
 
     useEffect(() => {
-        getUser()
+        window.localStorage.setItem('logged', 0)
+        if( window.localStorage.getItem('logged')==0) getUser()
+        else getUpdatedUser()
     }, [])
 
     const handleSubmit = async (e) => {

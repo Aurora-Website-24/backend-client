@@ -8,65 +8,60 @@ function HackathonRegistration() {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({});
-
-    
     const [userdata, setUserdata] = useState({});
+    const [prevTeamData, setPrevTeamData] = useState({});
+
     const getUser = async () => {
         try {
             const response = await axios.get("http://localhost:6005/login/success", { withCredentials: true });
             setUserdata(response.data.user)
-            console.log(userdata)
-            // setFormData({
-            //     leaderName: userdata.name,
-            //     leaderPhoneNo: userdata.phoneNo,
-            //     leaderRegNo: userdata.regNo,
-            //     leaderLearnerid: userdata.learnerid,
-            // })
         } catch (error) {
             console.log("error", error)
         }
     }
 
-    const [prevTeamData, setPrevTeamData] = useState({});
+
     const getHackathonData = async () => {
         if (userdata.hackathon === true) {
+            console.log("in gethackathon data", userdata.regNo)
             try {
-                const response = await axios.get("http://localhost:6005/hackathon-team-data", { withCredentials: true });
-                setPrevTeamData(response.data.hackathon)
-                
+                const response = await axios.get(`http://localhost:6005/hackathon-team-data?leaderRegNo=${formData.learnerid}`, { withCredentials: true });
+                console.log("gethackathondata: ", response)
+                setPrevTeamData(response.data[0])
+
             } catch (error) {
                 console.log("error: ", error)
             }
         }
         else if (userdata.hackathon === false) {
             setPrevTeamData({
-                teamName: '',
+                teamName: undefined,
                 teamSize: null,
 
-                leaderName: '',
+                leaderName: undefined,
                 leaderPhoneNo: null,
                 leaderRegNo: null,
-                leaderLearnerid: '',
+                leaderLearnerid: undefined,
 
-                member1Name: '',
+                member1Name: undefined,
                 member1PhoneNo: null,
                 member1RegNo: null,
 
-                member2Name: '',
+                member2Name: undefined,
                 member2PhoneNo: null,
                 member2RegNo: null,
 
-                member3Name: '',
+                member3Name: undefined,
                 member3PhoneNo: null,
                 member3RegNo: null,
 
-                member4Name: '',
+                member4Name: undefined,
                 member4PhoneNo: null,
                 member4RegNo: null,
 
-                upiID: '',
-                txnID: '',
-                screenshot: '',
+                upiID: undefined,
+                txnID: undefined,
+                screenshot: undefined,
             });
         }
 
@@ -74,6 +69,9 @@ function HackathonRegistration() {
 
     useEffect(() => {
         getUser()
+    }, [])
+
+    useEffect(() => {
         getHackathonData()
 
         setFormData({
@@ -82,12 +80,7 @@ function HackathonRegistration() {
             leaderRegNo: userdata.regNo,
             leaderLearnerid: userdata.learnerid,
         })
-
-    }, [])
-
-    console.log("userdata", userdata)
-    console.log("prev team data", prevTeamData)
-    console.log("form data", formData)
+    }, [userdata])
 
     const [image, setImage] = useState("")
 
@@ -116,7 +109,6 @@ function HackathonRegistration() {
                 console.log("Response update patch JSON: ", json);
             } catch (error) {
                 console.error("Error updating data:", error);
-                // Handle the error as needed
             }
         }
 
@@ -177,13 +169,11 @@ function HackathonRegistration() {
             }
 
             const result = await response.json();
-            //console.log(result);
 
-            // Update the screenshot field in the form data
             setFormData({ ...formData, screenshot: result.secure_url });
         } catch (error) {
             console.error('Error uploading image:', error);
-            throw error; // Propagate the error to the calling function
+            throw error; 
         }
 
         if (uploadbtn) {
@@ -366,7 +356,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member1Name}
+                                        defaultValue={prevTeamData.member1Name}
                                         required
                                         type="text"
                                         name="member1Name"
@@ -386,7 +376,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member1PhoneNo}
+                                        defaultValue={prevTeamData.member1PhoneNo}
                                         required
                                         type="number"
                                         name="member1PhoneNo"
@@ -407,7 +397,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member1RegNo}
+                                        defaultValue={prevTeamData.member1RegNo}
                                         required
                                         type="number"
                                         name="member1RegNo"
@@ -440,7 +430,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member2Name}
+                                        defaultValue={prevTeamData.member2Name}
                                         type="text"
                                         name="member2Name"
                                         id="member2Name"
@@ -459,7 +449,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member2PhoneNo}
+                                        defaultValue={prevTeamData.member2PhoneNo}
                                         type="number"
                                         name="member2PhoneNo"
                                         id="member2PhoneNo"
@@ -479,7 +469,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member2RegNo}
+                                        defaultValue={prevTeamData.member2RegNo}
                                         type="number"
                                         name="member2RegNo"
                                         id="member2RegNo"
@@ -511,7 +501,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member3Name}
+                                        defaultValue={prevTeamData.member3Name}
                                         type="text"
                                         name="member3Name"
                                         id="member3Name"
@@ -530,7 +520,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member3PhoneNo}
+                                        defaultValue={prevTeamData.member3PhoneNo}
                                         type="number"
                                         name="member3PhoneNo"
                                         id="member3PhoneNo"
@@ -550,7 +540,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member3RegNo}
+                                        defaultValue={prevTeamData.member3RegNo}
                                         type="number"
                                         name="member3RegNo"
                                         id="member3RegNo"
@@ -582,7 +572,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member4Name}
+                                        defaultValue={prevTeamData.member4Name}
                                         type="text"
                                         name="member4Name"
                                         id="member4Name"
@@ -601,7 +591,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member4PhoneNo}
+                                        defaultValue={prevTeamData.member4PhoneNo}
                                         type="number"
                                         name="member4PhoneNo"
                                         id="member4PhoneNo"
@@ -621,7 +611,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
-                                        defaultValue={formData.member4RegNo}
+                                        defaultValue={prevTeamData.member4RegNo}
                                         type="number"
                                         name="member4RegNo"
                                         id="member4RegNo"
@@ -654,6 +644,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={prevTeamData.upiID}
                                         required
                                         type="text"
                                         name="upiID"
@@ -672,6 +663,7 @@ function HackathonRegistration() {
                             <div className="mt-2">
                                 <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                     <input
+                                        defaultValue={prevTeamData.txnID}
                                         required
                                         type="text"
                                         name="txnID"

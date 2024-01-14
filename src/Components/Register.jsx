@@ -329,7 +329,7 @@ const Register = () => {
                   {image ? <><p className="text-xs leading-5 text-gray-600 flex justify-center"><img src={URL.createObjectURL(image)} alt="Selected" className="ml-2 w-10 h-10 object-cover rounded-full" /></p></> : null}
                   <p className="text-xs leading-5 text-gray-600 flex justify-center">PNG, JPG</p>
                   <br />
-                  <button id='upload' class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={uploadScreenshot}>
+                  <button id='upload' className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={uploadScreenshot}>
                     Upload
                   </button>
                 </div>
