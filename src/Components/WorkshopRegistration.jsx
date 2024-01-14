@@ -3,36 +3,67 @@ import axios from "axios";
 
 const WorkshopRegistration = () => {
 
-    const [userdata, setUserdata] = useState({});
-    // console.log("response", userdata)
+    var registeredWorkshops = []
+    const [logged, setLogged] = useState(0)
+    const [registered, setRegistered] = useState([])
+    const [userData, setUserData] = useState({});
 
     const getUser = async () => {
         try {
             const response = await axios.get("http://localhost:6005/login/success", { withCredentials: true });
+            setLogged(1)
+            localStorage.setItem('uniqueID', response.data.user._id);
+            console.log(response.data.user.workshops)
+            setUserData(response.data.user)
 
-            setUserdata(response.data.user)
+            let a = response.data.user.workshops
+            let newRegistered = []
+            for (let i = 0; i < a.length; i++) {
+                if (a[i] === "ISTE") { newRegistered.push("E1_TS1_1"); document.getElementById("E1_TS1_1").checked = true }
+                else if (a[i] === "ACM") { newRegistered.push("E2_TS1_2"); document.getElementById("E2_TS1_2").checked = true }
+                else if (a[i] === "IECSE") { newRegistered.push("E3_TS2_1"); document.getElementById("E3_TS2_1").checked = true }
+                else if (a[i] === "IEMCT") { newRegistered.push("E4_TS2_2"); document.getElementById("E4_TS2_2").checked = true }
+                else if (a[i] === "MIST") { newRegistered.push("E5_TS3_1"); document.getElementById("E5_TS3_1").checked = true }
+                else if (a[i] === "Astronomy") { newRegistered.push("E6_TS3_2"); document.getElementById("E6_TS3_2").checked = true }
+                else if (a[i] === "IOSD") { newRegistered.push("E7_TS3_3"); document.getElementById("E7_TS3_3").checked = true }
+                else if (a[i] === "IE-ENC") { newRegistered.push("E8_TS4_1"); document.getElementById("E8_TS4_1").checked = true }
+            }
+            setRegistered(newRegistered)
         } catch (error) {
             console.log("error", error)
         }
+        console.log(registered)
+    }
+
+    const getUpdatedUser = async () => {
+        try {
+            const response = await axios.get(`http://localhost:6005/updated-user-data/${localStorage.getItem('uniqueID')}`, { withCredentials: true });
+            console.log("next update: ", response.data.user.workshop)
+            setUserData(response.data.user)
+            let a = response.data.user.workshops
+            let newRegistered = []
+            for (let i = 0; i < a.length; i++) {
+                console.log("hello", i, a[i]);
+                if (a[i] === "ISTE") { newRegistered.push("E1_TS1_1"); document.getElementById("E1_TS1_1").checked = true }
+                else if (a[i] === "ACM") { newRegistered.push("E2_TS1_2"); document.getElementById("E2_TS1_2").checked = true }
+                else if (a[i] === "IECSE") { newRegistered.push("E3_TS2_1"); document.getElementById("E3_TS2_1").checked = true }
+                else if (a[i] === "IEMCT") { newRegistered.push("E4_TS2_2"); document.getElementById("E4_TS2_2").checked = true }
+                else if (a[i] === "MIST") { newRegistered.push("E5_TS3_1"); document.getElementById("E5_TS3_1").checked = true }
+                else if (a[i] === "Astronomy") { newRegistered.push("E6_TS3_2"); document.getElementById("E6_TS3_2").checked = true }
+                else if (a[i] === "IOSD") { newRegistered.push("E7_TS3_3"); document.getElementById("E7_TS3_3").checked = true }
+                else if (a[i] === "IE-ENC") { newRegistered.push("E8_TS4_1"); document.getElementById("E8_TS4_1").checked = true }
+            }
+            setRegistered(newRegistered)
+        } catch (error) {
+            console.log("error", error)
+        }
+        console.log(registered)
+
     }
 
     useEffect(() => {
         getUser()
     }, [])
-
-    const allEvents = {
-        "E1_TS1_1": "ISTE",
-        "E2_TS1_2": "ACM",
-        "E3_TS2_1": "IECSE",
-        "E4_TS2_2": "IEMCT",
-        "E5_TS3_1": "MIST",
-        "E6_TS3_2": "Astronomy",
-        "E7_TS3_3": "IOSD",
-        "E8_TS4_1": "IE-ENC",
-    };
-
-    const registered = []
-    const registeredWorkshops = []
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -46,61 +77,70 @@ const WorkshopRegistration = () => {
                 case "E6_TS3_2": registeredWorkshops.push("Astronomy"); break;
                 case "E7_TS3_3": registeredWorkshops.push("IOSD"); break;
                 case "E8_TS4_1": registeredWorkshops.push("IE-ENC"); break;
-              }            
+            }
         }
         console.log("workshops: ", registeredWorkshops)
 
         try {
-            const response = await fetch(`http://localhost:6005/workshop-registration/${userdata._id}`, {
-              method: 'PATCH',
-              body: JSON.stringify({workshops: registeredWorkshops}),
-              headers: {
-                'Content-Type': 'application/json'
-              }
+            const response = await fetch(`http://localhost:6005/workshop-registration/${userData._id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ workshops: registeredWorkshops }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
-      
+
             const json = await response.json();
             console.log("Response JSON: ", json);
-          } catch (error) {
-            console.error("Error updating data:", error);
-          }
 
-          clearSelection()
+        } catch (error) {
+            console.error("Error updating data:", error);
+        }
+
+        registeredWorkshops = []
+        getUpdatedUser()
     }
 
     const clearSelection = () => {
-        for(let i=0; i<registered.length; i++){
-            document.getElementById(registered[i]).checked=false
-            registered.splice(i, 1)
-            registeredWorkshops.splice(i, 1)
-            i--
+        let a = document.getElementsByClassName('event')
+        for (let i = 0; i < a.length; i++) {
+            a[i].checked = false
         }
         console.log(registered)
+        setRegistered([])
     }
 
     function updateEvent(eventID) {
 
+        // console.log("before", registered)
+
         let timeSlot = eventID.substring(3, 6)
-        for (let i = 0; i < registered.length; i++) {
+        let newRegistered = [...registered];
+
+        for (let i = 0; i < newRegistered.length; i++) {
             let found = 0
-            if (registered[i].includes(timeSlot)) {
+            if (newRegistered[i].includes(timeSlot)) {
                 found = 1
-                document.getElementById(registered[i]).checked = false
-                registered.splice(i, 1)
-                registered.push(eventID)
+                document.getElementById(newRegistered[i]).checked = false
+                newRegistered.splice(i, 1)
+                newRegistered.push(eventID)
                 document.getElementById(eventID).checked = true
+                setRegistered(newRegistered)
             }
-            else if (i === registered.length - 1 && found === 0) {
-                registered.push(eventID)
+            else if (i === newRegistered.length - 1 && found === 0) {
+                newRegistered.push(eventID)
                 document.getElementById(eventID).checked = true
+                setRegistered(newRegistered)
             }
         }
 
-        if (registered.length === 0) {
-            registered.push(eventID)
+        if (newRegistered.length === 0) {
+            console.log(" 0 len")
+            newRegistered.push(eventID)
             document.getElementById(eventID).checked = true
+            setRegistered(newRegistered)
         }
-        console.log(registered)
+        // console.log("after", registered)
     }
 
     return (
@@ -204,7 +244,6 @@ const WorkshopRegistration = () => {
             <button
                 onClick={() => clearSelection()}
             >Clear</button>
-
 
         </>
 
